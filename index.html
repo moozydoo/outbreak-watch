@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Outbreak Watch</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#dashboard" aria-label="Outbreak Watch home">
+          <span class="brand-mark">OW</span>
+          <span>
+            <strong>Outbreak Watch</strong>
+            <small>Emerging disease intelligence</small>
+          </span>
+        </a>
+
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <a href="#dashboard" data-route="dashboard">Dashboard</a>
+          <a href="#diseases" data-route="diseases">Diseases</a>
+          <a href="#alerts" data-route="alerts">Alerts</a>
+          <a href="#analytics" data-route="analytics">Analytics</a>
+          <a href="#admin" data-route="admin">Admin</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <button class="icon-button" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle theme">
+            <span aria-hidden="true">DM</span>
+          </button>
+          <button class="auth-button" id="authButton" type="button">Sign in</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero-panel" aria-labelledby="pageTitle">
+          <div>
+            <p class="eyebrow">Confirmed public health data, not panic alerts</p>
+            <h1 id="pageTitle">Monitor outbreaks by disease, severity, and geography.</h1>
+            <p>
+              Track emerging infectious diseases with pandemic potential across global, national, and U.S. state views.
+              Every data point is labeled by report status, source, and date.
+            </p>
+          </div>
+          <div class="hero-status" aria-label="System status">
+            <span class="pulse-dot"></span>
+            <span>Live monitoring simulation</span>
+            <strong id="lastUpdatedHero"></strong>
+          </div>
+        </section>
+
+        <section class="controls-band" aria-label="Dashboard filters">
+          <label>
+            Mode
+            <select id="modeSelect">
+              <option value="public">General public</option>
+              <option value="clinical">Healthcare worker</option>
+              <option value="epi">Public health</option>
+              <option value="travel">Travel</option>
+            </select>
+          </label>
+          <label>
+            Location level
+            <select id="levelSelect">
+              <option value="global">Global</option>
+              <option value="continent">Continent</option>
+              <option value="country">Country</option>
+              <option value="us">United States</option>
+              <option value="state">U.S. state</option>
+              <option value="county">County/region</option>
+            </select>
+          </label>
+          <label>
+            Disease
+            <select id="diseaseSelect"></select>
+          </label>
+          <label>
+            Severity
+            <select id="severitySelect">
+              <option value="all">All risk levels</option>
+              <option value="low">Green: low concern</option>
+              <option value="monitoring">Yellow: monitoring</option>
+              <option value="regional">Orange: regional outbreak</option>
+              <option value="high">Red: high-risk outbreak</option>
+              <option value="pandemic">Purple: pandemic potential</option>
+            </select>
+          </label>
+          <label>
+            Transmission
+            <select id="transmissionSelect">
+              <option value="all">All transmission</option>
+              <option value="respiratory">Respiratory</option>
+              <option value="vector">Vector-borne</option>
+              <option value="contact">Direct contact</option>
+              <option value="food-water">Food or water</option>
+              <option value="zoonotic">Zoonotic</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="route active" id="dashboard" aria-label="Main dashboard">
+          <div class="metrics-grid" id="metricsGrid"></div>
+
+          <section class="map-layout">
+            <div class="map-panel">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Global outbreak map</p>
+                  <h2>Spread and severity</h2>
+                </div>
+                <div class="map-tools">
+                  <button class="chip active" data-map-view="markers" type="button">Markers</button>
+                  <button class="chip" data-map-view="heat" type="button">Heat zones</button>
+                  <button class="chip" data-map-view="time" type="button">Spread over time</button>
+                </div>
+              </div>
+              <div class="world-map" id="worldMap" aria-label="Interactive outbreak map"></div>
+              <div class="risk-legend" id="riskLegend"></div>
+            </div>
+
+            <aside class="side-panel">
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow">New alerts</p>
+                  <h2>Official signal queue</h2>
+                </div>
+              </div>
+              <div id="alertFeed" class="alert-feed"></div>
+            </aside>
+          </section>
+
+          <section class="content-grid">
+            <div class="wide-panel">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Current outbreaks</p>
+                  <h2>Watchlist</h2>
+                </div>
+                <button class="secondary-button" id="exportReport" type="button">Export PDF-ready report</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Disease</th>
+                      <th>Location</th>
+                      <th>Risk</th>
+                      <th>Cases</th>
+                      <th>Deaths</th>
+                      <th>CFR</th>
+                      <th>Transmission</th>
+                      <th>Trend</th>
+                      <th>Updated</th>
+                      <th>Source</th>
+                    </tr>
+                  </thead>
+                  <tbody id="outbreakRows"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="side-panel mode-panel">
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow">Current mode</p>
+                  <h2 id="modeTitle">General public</h2>
+                </div>
+              </div>
+              <div id="modeSummary"></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="route" id="diseases" aria-label="Disease profiles">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Disease database</p>
+              <h2>Profiles and official guidance</h2>
+            </div>
+          </div>
+          <div class="profile-layout">
+            <div class="profile-list" id="profileList"></div>
+            <article class="profile-detail" id="profileDetail"></article>
+          </div>
+        </section>
+
+        <section class="route" id="alerts" aria-label="Custom alerts">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Customizable alerts</p>
+              <h2>Notify me when risk changes</h2>
+            </div>
+          </div>
+          <div class="form-grid">
+            <form class="builder-panel" id="alertForm">
+              <label>Disease <select id="alertDisease"></select></label>
+              <label>Location <input id="alertLocation" placeholder="Country, state, or county" value="California" /></label>
+              <label>Risk threshold <select id="alertRisk"></select></label>
+              <label>Case count increase <input id="alertIncrease" type="number" min="1" value="25" /></label>
+              <label class="check-row"><input id="alertNewGeo" type="checkbox" checked /> New state or country involvement</label>
+              <label class="check-row"><input id="alertEmergency" type="checkbox" checked /> WHO/CDC emergency declaration</label>
+              <label class="check-row"><input id="alertGuidance" type="checkbox" checked /> Healthcare worker guidance update</label>
+              <div class="toggle-row" role="group" aria-label="Notification channels">
+                <label><input type="checkbox" checked /> Push</label>
+                <label><input type="checkbox" checked /> Email</label>
+              </div>
+              <button class="primary-button" type="submit">Create alert rule</button>
+            </form>
+            <div class="saved-panel">
+              <h3>Saved alert rules</h3>
+              <div id="savedAlerts"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="route" id="analytics" aria-label="Analytics">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Analytics</p>
+              <h2>Trends, spread, and comparisons</h2>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <div class="chart-panel"><h3>Cases over time</h3><canvas id="casesChart" width="680" height="300"></canvas></div>
+            <div class="chart-panel"><h3>Deaths over time</h3><canvas id="deathsChart" width="680" height="300"></canvas></div>
+            <div class="chart-panel"><h3>Geographic spread</h3><canvas id="spreadChart" width="680" height="300"></canvas></div>
+            <div class="chart-panel"><h3>Hospitalization / R-naught when available</h3><canvas id="severityChart" width="680" height="300"></canvas></div>
+          </div>
+        </section>
+
+        <section class="route" id="admin" aria-label="Admin panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Trusted user admin</p>
+              <h2>Curate outbreak records</h2>
+            </div>
+          </div>
+          <div class="admin-grid">
+            <form class="builder-panel" id="adminForm">
+              <label>Disease <input id="adminDisease" value="Nipah virus" /></label>
+              <label>Location <input id="adminLocation" value="Kerala, India" /></label>
+              <label>Risk score <input id="adminRiskScore" type="number" min="0" max="100" value="68" /></label>
+              <label>Case count <input id="adminCases" type="number" min="0" value="8" /></label>
+              <label>Deaths <input id="adminDeaths" type="number" min="0" value="2" /></label>
+              <label>Status
+                <select id="adminStatus">
+                  <option>Confirmed</option>
+                  <option>Suspected</option>
+                  <option>Resolved</option>
+                </select>
+              </label>
+              <label>Source link <input id="adminSource" value="https://www.who.int/emergencies/disease-outbreak-news" /></label>
+              <button class="primary-button" type="submit">Add or correct record</button>
+            </form>
+            <div class="saved-panel">
+              <h3>Admin audit trail</h3>
+              <div id="auditTrail"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
