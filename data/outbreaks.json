@@ -1,1 +1,15 @@
-
+[
+  {
+    "disease": "Measles",
+    "location": "Texas, United States",
+    "risk": "regional",
+    "cases": 221,
+    "deaths": 1,
+    "transmission": "respiratory",
+    "trend": "increasing",
+    "status": "Confirmed",
+    "updated": "2026-05-22",
+    "source": "State health department and CDC",
+    "url": "https://www.cdc.gov/measles/"
+  }
+]
